@@ -4,8 +4,10 @@ const loadCSV = require('./load-csv');
 const LogisticRegression = require('./logistic-regression');
 const plot = require('node-remote-plot');
 const _= require('lodash');
-
-const { features, labels, testFeatures, testLabels} = loadCSV('../data/BMI.csv', {
+// const houseSalesDataset = tf.data.csv("http://10.0.106.159:8080/data/BMI.csv");
+// console.log(houseSalesDataset);
+module.exports = function allF(gender, height, weight){
+const { features, labels, testFeatures, testLabels} = loadCSV("./data/BMI.csv", {
     dataColumns: [
         'Height',
         'Weight',
@@ -14,7 +16,7 @@ const { features, labels, testFeatures, testLabels} = loadCSV('../data/BMI.csv',
     labelColumns:['Index'],
     shuffle: true,
     splitTest: 50,
-    gender:['Male'],
+    gender:[gender],
     converters:{ Index: value =>{
         const index = parseFloat(value);
         if(index === 1){
@@ -40,10 +42,36 @@ const regression = new LogisticRegression(features, _.flatMap(labels), {
     // decisionBoundary: 0.6
 
 });
+
 regression.train();
-console.log(regression.test(testFeatures, _.flatMap(testLabels)));
-regression.predict([[185, 76]]).print();
+
+// console.log(regression.test(testFeatures, _.flatMap(testLabels)));
+ const f = regression.predict([[height, weight]]).get([0]);
+ var a;
+ switch(f) {
+    case 1:
+      a="Weak"
+      break;
+    case 2:
+        a="Normal"
+      break;
+    case 3:
+        a="Overweight"
+      break;
+    case 4:
+        a="Obesity"
+      break;
+    case 5:
+        a="Extreme Obesity"
+      break;
+    default:
+      // code block
+  }
+
 // console.log(regression.costHistory)
 plot({
     x: regression.costHistory.reverse()
 })
+ return a;
+}
+
